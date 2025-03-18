@@ -1,0 +1,19 @@
+[MASTER]
+load-plugins=pylint_django
+django-settings-module=config.settings
+init-hook='import sys; sys.path.append(".")'
+
+[MESSAGES CONTROL]
+disable=C0111,R0903,C0103,R0201,W0613,C0301
+
+[FORMAT]
+max-line-length=120
+
+[BASIC]
+good-names=i,j,k,ex,Run,_,pk,id
+
+[DESIGN]
+max-parents=13
+
+[TYPECHECK]
+generated-members=REQUEST,acl_users,aq_parent,"[a-zA-Z]+_set{1,2}",save,delete

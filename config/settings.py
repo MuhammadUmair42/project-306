@@ -2,7 +2,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-your-secret-key-here'
+SECRET_KEY = 'django-insecure-3@psud_39k-=-_*vg-6evjko2&9k3w!uxjxht-ldr&93ms^@ys'
 
 DEBUG = True
 
@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django_filters',
     # Local apps
     'catalog.apps.CatalogConfig',
+    'catalog',
 ]
 
 MIDDLEWARE = [
