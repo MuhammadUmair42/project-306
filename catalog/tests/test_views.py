@@ -1,8 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from rest_framework import status
-from catalog.models.category import Category
-from catalog.models.product import Product
+from catalog.models import Category, Product
 
 class ViewTests(TestCase):
     def setUp(self):

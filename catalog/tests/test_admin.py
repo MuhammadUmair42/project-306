@@ -1,8 +1,7 @@
 from django.test import TestCase
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.models import User
-from catalog.models.category import Category
-from catalog.models.product import Product
+from catalog.models import Category, Product
 from catalog.admin import CategoryAdmin, ProductAdmin
 
 class MockRequest:
