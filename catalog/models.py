@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.db.models import Index
-from catalog.models import StockHistory
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
