@@ -4,7 +4,7 @@ django-settings-module=config.settings
 init-hook='import sys; sys.path.append(".")'
 
 [MESSAGES CONTROL]
-disable=C0111,R0903,C0103,R0201,W0613,C0301
+disable=C0111,R0903,C0103,W0613,C0301
 
 [FORMAT]
 max-line-length=120
