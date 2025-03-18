@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Product
+from .models import Category, Product,StockHistory
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,3 +20,9 @@ class ProductSerializer(serializers.ModelSerializer):
         if value < 0:
             raise serializers.ValidationError("Stock quantity cannot be negative")
         return value
+
+class StockHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StockHistory
+        fields = ['quantity_changed', 'previous_quantity', 'new_quantity', 
+                 'change_reason', 'created_at']

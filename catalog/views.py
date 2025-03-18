@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django_filters import rest_framework as django_filters
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductSerializer
+from rest_framework.pagination import PageNumberPagination
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -24,6 +25,7 @@ class ProductFilter(django_filters.FilterSet):
         ),
         method='filter_stock_status'
     )
+    search = django_filters.CharFilter(method='search_fields')
 
     class Meta:
         model = Product
@@ -38,17 +40,30 @@ class ProductFilter(django_filters.FilterSet):
             return queryset.filter(stock_quantity__gt=5)
         return queryset
 
+    def search_fields(self, queryset, name, value):
+        return queryset.filter(
+            models.Q(name__icontains=value) |
+            models.Q(description__icontains=value) |
+            models.Q(sku__icontains=value)
+        )
+
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related('category').all()
     serializer_class = ProductSerializer
     filter_backends = [
         django_filters.DjangoFilterBackend,
-        filters.SearchFilter,
         filters.OrderingFilter
     ]
     filterset_class = ProductFilter
-    search_fields = ['name', 'description', 'sku']
     ordering_fields = ['name', 'price', 'stock_quantity', 'created_at']
+    pagination_class = PageNumberPagination
+
+    @action(detail=True, methods=['get'])
+    def stock_history(self, request, pk=None):
+        product = self.get_object()
+        history = product.stock_history.all()
+        serializer = StockHistorySerializer(history, many=True)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
     def adjust_stock(self, request, pk=None):

@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.db.models import Index
+from catalog.models import StockHistory
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -12,7 +14,7 @@ class Category(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return self.name
+        return str(self.name)  
 
 
 class Product(models.Model):
@@ -34,18 +36,66 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        indexes = [
+            models.Index(fields=['name']),
+            models.Index(fields=['sku']),
+            models.Index(fields=['category']),
+            models.Index(fields=['stock_quantity']),
+        ]
         ordering = ['name']
+
+    def adjust_stock(self, quantity, reason="Manual adjustment"):
+        previous_quantity = self.stock_quantity
+        new_quantity = previous_quantity + quantity
+        
+        if new_quantity < 0:
+            raise ValueError("Stock cannot be negative")
+            
+        self.stock_quantity = new_quantity
+        self.save()
+        
+        # Create stock history record
+        StockHistory.objects.create(
+            product=self,
+            quantity_changed=quantity,
+            previous_quantity=previous_quantity,
+            new_quantity=new_quantity,
+            change_reason=reason
+        )
+        
+        # Check for low stock alert
+        if self.stock_quantity <= 5:
+            self.send_low_stock_alert()
+
+    def send_low_stock_alert(self):
+        # In a real application, you might want to:
+        # 1. Send email
+        # 2. Create notification
+        # 3. Trigger webhook
+        # For now, we'll just print
+        print(f"Low stock alert: {self.name} - {self.stock_quantity} units remaining")
 
     def __str__(self):
         return self.name
 
-    def adjust_stock(self, quantity):
-        """
-        Adjust stock quantity. Positive number increases stock,
-        negative number decreases stock.
-        """
-        new_quantity = self.stock_quantity + quantity
-        if new_quantity < 0:
-            raise ValueError("Stock cannot be negative")
-        self.stock_quantity = new_quantity
-        self.save()
+
+class StockHistory(models.Model):
+    product = models.ForeignKey(
+        Product, 
+        on_delete=models.CASCADE,
+        related_name='stock_history'
+    )
+    quantity_changed = models.IntegerField()
+    previous_quantity = models.PositiveIntegerField()
+    new_quantity = models.PositiveIntegerField()
+    change_reason = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            Index(fields=['product', '-created_at']),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.product.name} - {self.quantity_changed} units"
