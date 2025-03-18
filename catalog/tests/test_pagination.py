@@ -6,7 +6,7 @@ from django.urls import reverse
 from catalog.models import Category, Product
 from decimal import Decimal
 
-class PaginationTest(APITestCase):
+class PaginationTest(APITestCase):  
     def setUp(self):
         self.category = Category.objects.create(name='Electronics')
         # Create 15 products for pagination testing
